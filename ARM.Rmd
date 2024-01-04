@@ -1,0 +1,105 @@
+---
+title: "ARM"
+author: "Varad"
+date: "2023-10-04"
+output: html_document
+---
+
+```{r}
+#install.packages("TSP")
+#install.packages("data.table")
+#install.packages("dplyr", dependencies = TRUE)
+#install.packages("purrr", dependencies = TRUE)
+#install.packages("devtools", dependencies = TRUE)
+#install.packages("tidyr")
+library(viridis)
+#remove.packages("Matrix")
+library(arules)
+library(TSP)
+library(data.table)
+#library(ggplot2)
+library(Matrix)
+library(tcltk)
+#library(dplyr)
+#library(devtools)
+#library(purrr)
+#library(tidyr)
+install.packages("arules")
+library(arules)
+#detach("package:arulesViz", unload=TRUE)
+#detach("package:arules", unload=TRUE)
+#library(arules)
+#install.packages("arulesViz")
+library(arulesViz)
+```
+
+```{r}
+genres <- read.transactions("C:/Users/luktu/Desktop/CU Boulder/Fall'23/Machine Learning/Assignment2/genres.csv",
+                             rm.duplicates = FALSE, 
+                             format = "basket",  ##if you use "single" also use cols=c(1,2)
+                             sep=",",  ## csv file
+                             cols=NULL) ## The dataset has no row numbers
+inspect(genres[1:10])
+```
+
+```{r}
+G_rules = arules::apriori(genres, parameter = list(support = 0.025, confidence = 0.2, minlen = 2))
+
+inspect(G_rules)
+```
+
+```{r}
+SortedRules_Support <- sort(G_rules, by="support", decreasing=TRUE)
+inspect(SortedRules_Support[1:15])
+```
+
+
+
+```{r}
+plot(G_rules, method = "graph")
+```
+
+
+```{r}
+SortedRules_Confidence <- sort(G_rules, by="confidence", decreasing=TRUE)
+inspect(SortedRules_Confidence[1:15])
+```
+
+```{r}
+SortedRules_Lift <- sort(G_rules, by="lift", decreasing=TRUE)
+inspect(SortedRules_Lift[1:15])
+plot(G_rules)
+```
+
+
+
+```{r}
+plot(SortedRules_Lift, method="graph", engine="interactive")
+```
+
+
+```{r}
+G_plot <- plot(G_rules, method="graph", engine="htmlwidget")
+```
+
+
+```{r}
+#install.packages("htmlwidgets")
+library(htmlwidgets)
+
+saveWidget(G_plot, "Rules.html")
+```
+
+
+
+
+```{r}
+plot(G_rules, method = "scatterplot", 
+     measure = c("support", "confidence"),
+     shading = "lift", engine="interactive")
+```
+
+```{r}
+plot(G_rules, method = "matrix", measure = "lift", control = list(reorder = "support/confidence"))
+```
+

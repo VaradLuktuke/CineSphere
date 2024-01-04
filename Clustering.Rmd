@@ -1,0 +1,131 @@
+---
+title: "Clustering"
+author: "Varad"
+date: "2023-10-04"
+output: html_document
+---
+
+```{r}
+#install.packages("NbClust")
+library(NbClust)
+library(cluster)
+#install.packages("mclust")
+library(mclust)
+```
+
+```{r}
+#install.packages("amap")
+library(amap)  ## for using Kmeans (notice the cap K)
+#install.packages("rlang")
+library(ggplot2)
+library(factoextra) ## for cluster vis, silhouette, etc.
+library(purrr)
+```
+
+```{r}
+#install.packages("stylo")
+library(stylo)  ## for dist.cosine
+#install.packages("philentropy")
+library(philentropy)  ## for distance() which offers 46 metrics
+#install.packages("SnowballC")
+library(SnowballC)
+#install.packages("caTools")
+library(caTools)
+library(dplyr)
+#install.packages("stringr")
+library(stringr)
+#install.packages("wordcloud")
+library(wordcloud)
+```
+```{r}
+df <- read.csv("C:/Users/luktu/Desktop/CU Boulder/Fall'23/Machine Learning/Assignment1/CleanedData.csv")
+head(df)
+```
+
+```{r}
+clu_df = df[, c(7, 10, 13, 16, 17, 18)]
+head(clu_df)
+```
+
+```{r}
+clu_df_norm <- as.data.frame(apply(clu_df, 2, ##2 for col
+                                 function(x) 100*(x - min(x))/(max(x)-min(x))))
+head(clu_df_norm)
+```
+```{r}
+# Sample 500 random rows from the dataframe
+sampled_df <- clu_df_norm[sample(nrow(clu_df_norm), 500), ]
+```
+
+```{r}
+cosine_hclust_trans <- function(df, k_val=2){
+  # Calculate cosine similarity matrix
+  cosine_similarity_matrix <- proxy::simil(as.matrix(t(df)), method = "cosine")
+  
+  # Ensure diagonals (self-similarity) are set to 0
+  diag(cosine_similarity_matrix) <- 0
+  
+  # Perform hierarchical clustering using cosine similarity
+  hc <- hclust(as.dist(1 - cosine_similarity_matrix), method = "ward.D2")
+  plot(hc, cex=.7, hang=-11, 
+       main = "Cosine Similarity Hierarchical Clustering",
+       xlab="",
+       ylab="Height")
+  rect.hclust(hc, k=k_val)
+}
+```
+
+```{r}
+cosine_hclust_trans(sampled_df)
+```
+```{r}
+cosine_hclust <- function(df, k_val){
+  # Calculate cosine similarity matrix
+  cosine_similarity_matrix <- proxy::simil(as.matrix(df), method = "cosine")
+  
+  # Ensure diagonals (self-similarity) are set to 0
+  diag(cosine_similarity_matrix) <- 0
+  
+  # Perform hierarchical clustering using cosine similarity
+  hc <- hclust(as.dist(1 - cosine_similarity_matrix), method = "ward.D2")
+  plot(hc, cex=.7, hang=-11, 
+       main = "Cosine Similarity Hierarchical Clustering",
+       xlab="",
+       ylab="Height")
+  rect.hclust(hc, k=k_val)
+}
+```
+
+```{r}
+cosine_hclust(sampled_df, 2)
+```
+
+```{r}
+cosine_hclust(clu_df_norm, 2)
+```
+```{r}
+cosine_hclust_complete <- function(df, k_val){
+  # Calculate cosine similarity matrix
+  cosine_similarity_matrix <- proxy::simil(as.matrix(df), method = "cosine")
+  
+  # Ensure diagonals (self-similarity) are set to 0
+  diag(cosine_similarity_matrix) <- 0
+  
+  # Perform hierarchical clustering using cosine similarity
+  hc <- hclust(as.dist(1 - cosine_similarity_matrix), method = "complete")
+  plot(hc, cex=.7, hang=-11, 
+       main = "Cosine Similarity Hierarchical Clustering",
+       xlab="",
+       ylab="Height")
+  rect.hclust(hc, k=k_val)
+}
+```
+
+```{r}
+cosine_hclust_complete(sampled_df, 2)
+```
+
+```{r}
+cosine_hclust_complete(clu_df_norm, 2)
+```
+
